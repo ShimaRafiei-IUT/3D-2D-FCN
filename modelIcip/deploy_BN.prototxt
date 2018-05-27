@@ -1,0 +1,856 @@
+name:  "CaffeNet"
+input: "cropSlice"
+input_shape{
+	dim: 1
+	dim: 38
+	dim: 512
+	dim: 512
+}
+
+input: "CurSlice"
+input_shape{
+	dim: 1
+	dim: 1
+	dim: 512
+	dim: 512
+}
+
+
+#========================================================================================================
+#=========================================================== 3D FCN =====================================
+#========================================================================================================
+layer {
+  name: "prepool1"
+  type: "Pooling"
+  bottom: "cropSlice"
+  top: "pooled_slice1"
+  pooling_param {
+    pool: AVE
+    kernel_size: 2
+    stride: 2
+
+
+  }
+}
+
+layer {
+  name: "prepool2"
+  type: "Pooling"
+  bottom: "pooled_slice1"
+  top: "pooled_slice"
+  pooling_param {
+    pool: AVE
+    kernel_size: 2
+    stride: 2
+
+
+  }
+}
+
+
+
+layer {
+  type: "Python"
+  name: "conver_to_3d"
+  top:  "pooled_slice_3D"
+  bottom: "pooled_slice"
+  python_param {
+    module: "ReshapeLayers"
+    layer: "Convert2DTo3D"
+  }
+}
+
+
+#==================================== 3d FCN level 0 ====================================================
+
+layer {
+  name: "FCN_C0"
+  type: "Convolution"
+  bottom: "pooled_slice_3D"
+  top: "FCN_C0"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 32
+    pad: 0  pad: 1  pad: 1 
+    kernel_size: 3     kernel_size: 3      kernel_size:3 
+    stride: 1   stride: 1   stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+
+layer { 
+	bottom: 'FCN_C0'	top: 'FCN_C0_BN'  name: 'BT_FCN_C0' type: 'BatchNorm'
+  	batch_norm_param {use_global_stats: false  moving_average_fraction: 0.999 }
+ 	param { lr_mult: 0 } 
+  	param { lr_mult: 0 } 
+  	param { lr_mult: 0 }
+     }
+layer{
+ 	bottom: 'FCN_C0_BN' top: 'FCN_C0_BN' name: 'SC_FCN_C0' type: 'Scale'
+  	scale_param { bias_term: true    axis: 1      num_axes: 1    filler { type: 'constant' value: 1 }         
+    	bias_filler { type: 'constant' value: 0.001 }  # initialize bias
+      }
+}
+
+layer {
+  name: "relu_FCN_C0"
+  type: "ReLU"
+  bottom: "FCN_C0_BN"
+  top: "FCN_C0_BN"
+}
+
+layer {
+  type: "Python"
+  name: "pool_FCN_C0"
+  top:  "FCN_P0"
+  bottom: "FCN_C0_BN"
+  python_param {
+    module: "ReshapeLayers"
+    layer: "Pooling3D"
+  }
+}
+
+#==================================== 3d FCN level 1 ====================================================
+
+layer {
+  name: "FCN_C1"
+  type: "Convolution"
+  bottom: "FCN_P0"
+  top: "FCN_C1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 32
+    pad: 0  pad: 1  pad: 1 
+    kernel_size: 3     kernel_size: 3      kernel_size:3 
+    stride: 1   stride: 1   stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer { 
+	bottom: 'FCN_C1'	top: 'FCN_C1_BN'  name: 'BT_FCN_C1' type: 'BatchNorm'
+  	batch_norm_param {use_global_stats: false  moving_average_fraction: 0.999 }
+ 	param { lr_mult: 0 } 
+  	param { lr_mult: 0 } 
+  	param { lr_mult: 0 }
+     }
+layer{
+ 	bottom: 'FCN_C1_BN' top: 'FCN_C1_BN' name: 'SC_FCN_C1' type: 'Scale'
+  	scale_param { bias_term: true    axis: 1      num_axes: 1    filler { type: 'constant' value: 1 }         
+    	bias_filler { type: 'constant' value: 0.001 }  # initialize bias
+      }
+}
+
+
+layer {
+  name: "relu_FCN_C1"
+  type: "ReLU"
+  bottom: "FCN_C1_BN"
+  top: "FCN_C1_BN"
+}
+
+layer {
+  type: "Python"
+  name: "pool_FCN_C1"
+  top:  "FCN_P1"
+  bottom: "FCN_C1_BN"
+  python_param {
+    module: "ReshapeLayers"
+    layer: "Pooling3D"
+  }
+}
+#==================================== 3d FCN level 2 ====================================================
+
+layer {
+  name: "FCN_C2"
+  type: "Convolution"
+  bottom: "FCN_P1"
+  top: "FCN_C2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 64
+    pad: 0  pad: 1  pad: 1 
+    kernel_size: 3     kernel_size: 3      kernel_size:3 
+    stride: 1   stride: 1   stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+
+
+layer { 
+	bottom: 'FCN_C2'	top: 'FCN_C2_BN'  name: 'BT_FCN_C2' type: 'BatchNorm'
+  	batch_norm_param {use_global_stats: false  moving_average_fraction: 0.999 }
+ 	param { lr_mult: 0 } 
+  	param { lr_mult: 0 } 
+  	param { lr_mult: 0 }
+     }
+layer{
+ 	bottom: 'FCN_C2_BN' top: 'FCN_C2_BN' name: 'SC_FCN_C2' type: 'Scale'
+  	scale_param { bias_term: true    axis: 1      num_axes: 1    filler { type: 'constant' value: 1 }         
+    	bias_filler { type: 'constant' value: 0.001 }  # initialize bias
+      }
+}
+
+
+
+
+layer {
+  name: "relu_FCN_C2"
+  type: "ReLU"
+  bottom: "FCN_C2_BN"
+  top: "FCN_C2_BN"
+}
+
+layer {
+  type: "Python"
+  name: "pool_FCN_C2"
+  top:  "FCN_P2"
+  bottom: "FCN_C2_BN"
+  python_param {
+    module: "ReshapeLayers"
+    layer: "Pooling3D"
+  }
+}
+
+
+#==================================== 3d FCN level 3 ====================================================
+
+layer {
+  name: "FCN_C3"
+  type: "Convolution"
+  bottom: "FCN_P2"
+  top: "FCN_C3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    pad: 0  pad: 1  pad: 1 
+    kernel_size: 3     kernel_size: 3      kernel_size:3 
+    stride: 1   stride: 1   stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+
+
+layer { 
+	bottom: 'FCN_C3'	top: 'FCN_C3_BN'  name: 'BT_FCN_C3' type: 'BatchNorm'
+  	batch_norm_param {use_global_stats: false  moving_average_fraction: 0.999 }
+ 	param { lr_mult: 0 } 
+  	param { lr_mult: 0 } 
+  	param { lr_mult: 0 }
+     }
+layer{
+ 	bottom: 'FCN_C3_BN' top: 'FCN_C3_BN' name: 'SC_FCN_C3' type: 'Scale'
+  	scale_param { bias_term: true    axis: 1      num_axes: 1    filler { type: 'constant' value: 1 }         
+    	bias_filler { type: 'constant' value: 0.001 }  # initialize bias
+      }
+}
+
+
+layer {
+  name: "relu_FCN_C3"
+  type: "ReLU"
+  bottom: "FCN_C3_BN"
+  top: "FCN_C3_BN"
+}
+
+
+
+layer {
+  type: "Python"
+  name: "conver2d_FCN_C3"
+  top:  "FCN_C3_2D"
+  bottom: "FCN_C3_BN"
+  python_param {
+    module: "ReshapeLayers"
+    layer: "Convert3DTo2D"
+  }
+}
+
+#============================================== deconv 1=================================================
+layer {
+  name: "deconv1"
+  type: "Deconvolution"
+  bottom: "FCN_C3_2D"
+  top: "deconv1"
+  param {
+    lr_mult: 0
+  }
+
+  convolution_param {
+    num_output: 128
+    kernel_size: 4
+    stride: 2
+    bias_term: false
+    weight_filler {
+      type: "bilinear"
+    }
+  }
+}
+
+
+layer {
+  type: "Python"
+  name: "conver2d_FCN_P1"
+  top:  "FCN_P1_2D"
+  bottom: "FCN_P1"
+  python_param {
+    module: "ReshapeLayers"
+    layer: "Convert3DTo2D"
+  }
+}
+
+
+
+layer {
+  name: "crop_deconv1"
+  type: "Crop"
+  bottom: "deconv1"
+  bottom: "FCN_P1_2D"
+  top: "crop_deconv1"
+  crop_param {
+    axis: 2
+    offset: 1
+  }
+}
+
+layer {
+  type: "Concat"
+  name: "Concat_deconv1"
+  top:  "concat_deconv1"
+  bottom: "FCN_P1_2D"
+  bottom: "crop_deconv1"
+}
+
+
+layer {
+  name: "drop1"
+  type: "Dropout"
+  bottom: "concat_deconv1"
+  top: "concat_deconv1"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+
+layer {
+  name: "decon1C"
+  type: "Convolution"
+  bottom: "concat_deconv1"
+  top: "decon1C"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+
+
+layer { 
+	bottom: 'decon1C'	top: 'decon1C_BN'  name: 'BT_decon1C' type: 'BatchNorm'
+  	batch_norm_param {use_global_stats: false  moving_average_fraction: 0.999 }
+ 	param { lr_mult: 0 } 
+  	param { lr_mult: 0 } 
+  	param { lr_mult: 0 }
+     }
+layer{
+ 	bottom: 'decon1C_BN' top: 'decon1C_BN' name: 'SC_decon1C' type: 'Scale'
+  	scale_param { bias_term: true    axis: 1      num_axes: 1    filler { type: 'constant' value: 1 }         
+    	bias_filler { type: 'constant' value: 0.001 }  # initialize bias
+      }
+}
+
+
+
+layer {
+  name: "relu_decon1C"
+  type: "ReLU"
+  bottom: "decon1C_BN"
+  top: "decon1C_BN"
+}
+
+#============================================== deconv 2=================================================
+layer {
+  name: "deconv2"
+  type: "Deconvolution"
+  bottom: "decon1C_BN"
+  top: "deconv2"
+  param {
+    lr_mult: 0
+  }
+
+  convolution_param {
+    num_output: 128
+    kernel_size: 4
+    stride: 2
+    bias_term: false
+    weight_filler {
+      type: "bilinear"
+    }
+
+  }
+}
+
+
+
+
+layer {
+  type: "Python"
+  name: "conver2d_FCN_P0"
+  top:  "FCN_P0_2D"
+  bottom: "FCN_P0"
+  python_param {
+    module: "ReshapeLayers"
+    layer: "Convert3DTo2D"
+  }
+}
+
+
+layer {
+  name: "crop_deconv2"
+  type: "Crop"
+  bottom: "deconv2"
+  bottom: "FCN_P0_2D"
+  top: "crop_deconv2"
+  crop_param {
+    axis: 2
+    offset: 1
+  }
+}
+
+layer {
+  type: "Concat"
+  name: "Concat_deconv2"
+  top:  "concat_deconv2"
+  bottom: "FCN_P0_2D"
+  bottom: "crop_deconv2"
+}
+
+
+layer {
+  name: "decon2C"
+  type: "Convolution"
+  bottom: "concat_deconv2"
+  top: "decon2C"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+
+layer { 
+	bottom: 'decon2C'	top: 'decon2C_BN'  name: 'BT_decon2C' type: 'BatchNorm'
+  	batch_norm_param {use_global_stats: false  moving_average_fraction: 0.999 }
+ 	param { lr_mult: 0 } 
+  	param { lr_mult: 0 } 
+  	param { lr_mult: 0 }
+     }
+layer{
+ 	bottom: 'decon2C_BN' top: 'decon2C_BN' name: 'SC_decon2C' type: 'Scale'
+  	scale_param { bias_term: true    axis: 1      num_axes: 1    filler { type: 'constant' value: 1 }         
+    	bias_filler { type: 'constant' value: 0.001 }  # initialize bias
+      }
+}
+
+
+
+
+layer {
+  name: "relu_decon2C"
+  type: "ReLU"
+  bottom: "decon2C_BN"
+  top: "decon2C_BN"
+}
+
+
+#============================================== deconv 3=================================================
+layer {
+  name: "deconv3"
+  type: "Deconvolution"
+  bottom: "decon2C_BN"
+  top: "deconv3"
+  param {
+    lr_mult: 0
+  }
+
+  convolution_param {
+    num_output: 64
+    kernel_size: 4
+    stride: 2
+    bias_term: false
+    weight_filler {
+      type: "bilinear"
+    }
+
+  }
+}
+
+
+layer {
+  type: "Python"
+  name: "conver2d_FCN_P00"
+  top:  "FCN_P00_2D"
+  bottom: "pooled_slice_3D"
+  python_param {
+    module: "ReshapeLayers"
+    layer: "Convert3DTo2D"
+  }
+}
+
+
+layer {
+  name: "crop_deconv3"
+  type: "Crop"
+  bottom: "deconv3"
+  bottom: "FCN_P00_2D"
+  top: "crop_deconv3"
+  crop_param {
+    axis: 2
+    offset: 1
+  }
+}
+
+
+layer {
+  type: "Concat"
+  name: "Concat_deconv3"
+  top:  "concat_deconv3"
+  bottom: "FCN_P00_2D"
+  bottom: "crop_deconv3"
+}
+
+
+layer {
+  name: "decon3C"
+  type: "Convolution"
+  bottom: "concat_deconv3"
+  top: "decon3C"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+
+
+layer { 
+	bottom: 'decon3C'	top: 'decon3C_BN'  name: 'BT_decon3C' type: 'BatchNorm'
+  	batch_norm_param {use_global_stats: false  moving_average_fraction: 0.999 }
+ 	param { lr_mult: 0 } 
+  	param { lr_mult: 0 } 
+  	param { lr_mult: 0 }
+     }
+layer{
+ 	bottom: 'decon3C_BN' top: 'decon3C_BN' name: 'SC_decon3C' type: 'Scale'
+  	scale_param { bias_term: true    axis: 1      num_axes: 1    filler { type: 'constant' value: 1 }         
+    	bias_filler { type: 'constant' value: 0.001 }  # initialize bias
+      }
+}
+
+
+
+layer {
+  name: "relu_decon3C"
+  type: "ReLU"
+  bottom: "decon3C_BN"
+  top: "decon3C_BN"
+}
+
+#============================================== deconv 4=================================================
+layer {
+  name: "deconv4"
+  type: "Deconvolution"
+  bottom: "decon3C_BN"
+  top: "deconv4"
+  param {
+    lr_mult: 0
+  }
+
+  convolution_param {
+    num_output: 64
+    kernel_size: 4
+    stride: 2
+    bias_term: false
+    weight_filler {
+      type: "bilinear"
+    }
+
+  }
+}
+
+
+layer {
+  type: "Python"
+  name: "conver2d_pooled_slice1"
+  top:  "pooled_slice1_2D"
+  bottom: "pooled_slice1"
+  python_param {
+    module: "ReshapeLayers"
+    layer: "CropCenterSlice"
+  }
+}
+
+layer {
+  name: "crop_deconv4"
+  type: "Crop"
+  bottom: "deconv4"
+  bottom: "pooled_slice1_2D"
+  top: "crop_deconv4"
+  crop_param {
+    axis: 2
+    offset: 1
+  }
+}
+
+
+layer {
+  type: "Concat"
+  name: "Concat_deconv4"
+  top:  "concat_deconv4"
+  bottom: "pooled_slice1_2D"
+  bottom: "crop_deconv4"
+}
+
+
+layer {
+  name: "decon4C"
+  type: "Convolution"
+  bottom: "concat_deconv4"
+  top: "decon4C"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+
+layer { 
+	bottom: 'decon4C'	top: 'decon4C_BN'  name: 'BT_decon4C' type: 'BatchNorm'
+  	batch_norm_param {use_global_stats: false  moving_average_fraction: 0.999 }
+ 	param { lr_mult: 0 } 
+  	param { lr_mult: 0 } 
+  	param { lr_mult: 0 }
+     }
+layer{
+ 	bottom: 'decon4C_BN' top: 'decon4C_BN' name: 'SC_decon4C' type: 'Scale'
+  	scale_param { bias_term: true    axis: 1      num_axes: 1    filler { type: 'constant' value: 1 }         
+    	bias_filler { type: 'constant' value: 0.001 }  # initialize bias
+      }
+}
+
+
+
+
+
+layer {
+  name: "relu_decon4C"
+  type: "ReLU"
+  bottom: "decon4C_BN"
+  top: "decon4C_BN"
+}
+
+
+#============================================== deconv 5=================================================
+
+
+
+
+
+
+layer {
+  name: "deconv5"
+  type: "Deconvolution"
+  bottom: "decon4C_BN"
+  top: "deconv5"
+  param {
+    lr_mult: 0
+  }
+
+  convolution_param {
+    num_output: 32
+    kernel_size: 4
+    stride: 2
+    bias_term: false
+    weight_filler {
+      type: "bilinear"
+    }
+
+  }
+}
+
+layer {
+  name: "crop_deconv5"
+  type: "Crop"
+  bottom: "deconv5"
+  bottom: "CurSlice"
+  top: "crop_deconv5"
+  crop_param {
+    axis: 2
+    offset: 1
+  }
+}
+
+
+
+layer {
+  type: "Concat"
+  name: "Concat_deconv5"
+  top:  "concat_deconv5"
+  bottom: "CurSlice"
+  bottom: "crop_deconv5"
+}
+
+
+layer {
+  name: "decon5C"
+  type: "Convolution"
+  bottom: "concat_deconv5"
+  top: "decon5C"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+
+layer {
+  name: "prob"
+  type: "Softmax"
+  bottom: "decon5C"
+  top: "prob"
+}
+
+
+
+
+
+
