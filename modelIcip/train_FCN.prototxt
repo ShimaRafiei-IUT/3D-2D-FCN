@@ -1,6 +1,6 @@
 name: "LeNet"
 layer {
-  name: "vessel"
+  name: "Abdomen"
   type: "HDF5Data"
   top: "Slice"
   top: "Label"
@@ -14,7 +14,7 @@ layer {
   include { phase: TRAIN }
 }
 layer {
-  name: "vessel"
+  name: "Abdomen"
   type: "HDF5Data"
   top: "Slice"
   top: "Label"
