@@ -7,7 +7,7 @@ layer {
   top: "Percent"
   top: "Weight"
   hdf5_data_param {
-    source: "./ModelICIP/TrainDatasetAddress.txt"
+    source: "./TrainDatasetAddress.txt"
     batch_size: 1
     shuffle: true
   }
@@ -21,7 +21,7 @@ layer {
   top: "Percent"
   top: "Weight"
   hdf5_data_param {
-    source: "./ModelICIP/TestDatasetAddress.txt"
+    source: "./TestDatasetAddress.txt"
     batch_size: 1
     shuffle: true
   }
