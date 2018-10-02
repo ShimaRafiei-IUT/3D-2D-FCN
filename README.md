@@ -3,7 +3,9 @@ The code, related to liver segmentation in abdominal CT scans, is provided here.
 
 You may follow these steps:
 
-First, run "CreateDataBase.m" in matlab to create the liver dataset and prepare it for network training.
+First, Download abdominal CT scans from https://www.synapse.org/ (just 30 train images & their labels). These have .nii extension, just extract them if they are ziped. 
+
+Second, run "CreateDataBase.m" in matlab to load the dataset and create it in hd5 format, to be prepared for network training.
 
 Next, run "TrainModel.py" to start network training on the python platform.
 
