@@ -16,21 +16,6 @@ from os import listdir
 from os.path import isfile, join
 import PIL
 import Image
-
-
-
-def ImagePaddingAndBGRtoRGB(im,pad,fitTo): 
-    r=im[:,:,0]
-    r= np.lib.pad(r, pad, 'symmetric')
-    g=im[:,:,1]
-    g= np.lib.pad(g, pad, 'symmetric')
-    b=im[:,:,2]
-    b= np.lib.pad(b, pad, 'symmetric')
-    res=np.zeros((fitTo[0],fitTo[1],3))
-    res[0:r.shape[0],0:r.shape[1],0]=r
-    res[0:r.shape[0],0:r.shape[1],1]=g
-    res[0:r.shape[0],0:r.shape[1],2]=b
-    return res
     
 caffe.set_device(0)
 caffe.set_mode_gpu()
