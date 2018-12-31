@@ -5,7 +5,7 @@ for person=1 : 6 %test index (according to the fold you 're testing on)
     % load('/home/user/Desktop/Abdomen/Dataset/Original/Train/img/img0002.mat'); % loading image
      load(['/home/user/Desktop/Abdomen/Model/ModelDFCN3D/DeployFold1Label3/Validation/person__' num2str(person) '_50.mat']); %load results
     Y2(Y2~=6) = 0;
-    Y2(Y2==6) = 1;
+    Y2(Y2==6) = 1;% liver label
     figure,imshow3D(Y2);
 	
     result=GenerateMask3D(result,0.5);
