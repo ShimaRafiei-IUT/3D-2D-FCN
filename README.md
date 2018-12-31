@@ -12,7 +12,7 @@ Third, run "TrainModel.py" to start network training on the python platform.
 
 Next, run "TestModel.py" to test the network under python platform.
 
-Last, run CRF2D.m in matlab to perform conditional random field for enhancing the segmented masks.
+Last, run CRF2D.m in matlab to perform conditional random field for enhancing the segmented masks and finally check your result with dice_score.m . 
 
 Do not forget to change all address path according to yours. 
 In this project, some of the implemented layers of FCN like center selector and 3D pooling layers, are available in "ReshapeLayers.py".
