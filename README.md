@@ -1,5 +1,5 @@
-# 3D to 2D FULLY Convoltional Network For Medical Organ (e.g. Liver) Segmentation[1]. 
-The code, related to liver segmentation in abdominal CT scans, is provided here. 3D-2D-FCN is implemented on "caffe" framework; thus, your system requires "caffe" framework as prerequisite to run this project.
+# 3D to 2D FULLY Convoltional Network For Medical Organ (e.g. Liver) Segmentation. 
+The code, related to liver segmentation in abdominal CT scans, is provided here. 3D-2D-FCN [1] is implemented on "caffe" framework; thus, your system requires "caffe" framework as prerequisite to run this project.
 
 You may follow these steps:
 
