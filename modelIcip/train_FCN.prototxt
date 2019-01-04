@@ -1,25 +1,27 @@
 name: "LeNet"
 layer {
-  name: "Abdomen"
+  name: "vessel"
   type: "HDF5Data"
   top: "Slice"
   top: "Label"
+  top: "Percent"
   top: "Weight"
   hdf5_data_param {
-    source: "./TrainDatasetAddress.txt"
+    source: "./Model/ModelICIP/TrainDatasetAddress.txt"
     batch_size: 1
     shuffle: true
   }
   include { phase: TRAIN }
 }
 layer {
-  name: "Abdomen"
+  name: "vessel"
   type: "HDF5Data"
   top: "Slice"
   top: "Label"
+  top: "Percent"
   top: "Weight"
   hdf5_data_param {
-    source: "./TestDatasetAddress.txt"
+    source: "./Model/ModelICIP/TestDatasetAddress.txt"
     batch_size: 1
     shuffle: true
   }
@@ -30,12 +32,17 @@ layer {
 layer {
   type: "Python"
   name: "cropSlice"
+
+
+
   bottom: "Slice"
   bottom: "Label"
+  bottom: "Percent"
   bottom: "Weight"
 
   top:  "cropSlice"
   top:  "croplabel"
+  top: "CurSlice"
   top: "weightMap"
 
   python_param {
@@ -892,3 +899,16 @@ layer {
   top: "soft_loss"
 }
 
+#layer {
+#  type: "Python"
+#  name: "loss_reg"
+#  bottom: "balancedDecon5C"
+#  bottom: "croplabel"
+#
+#  top: "dice"
+#  python_param {
+#    module: "ReshapeLayers"
+#    layer: "DiceAccuracyLossLayer"
+#}
+#  loss_weight: 1
+#}
