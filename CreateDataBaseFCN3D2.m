@@ -18,7 +18,7 @@ totalPerson=30;
 
 
 for foldNum=1:1
-     address='./Dataset/DataBaseFCN3D2/';
+     address='./Dataset/DataBaseFCN3D2/'; %%create this folder
 
     %% -----------    
     for n=1:30
