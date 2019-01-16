@@ -1,0 +1,7 @@
+./Dataset/DataBaseFCN3D2/person25.h5
+./Dataset/DataBaseFCN3D2/person26.h5
+./Dataset/DataBaseFCN3D2/person27.h5
+./Dataset/DataBaseFCN3D2/person28.h5
+./Dataset/DataBaseFCN3D2/person29.h5
+./Dataset/DataBaseFCN3D2/person30.h5
+

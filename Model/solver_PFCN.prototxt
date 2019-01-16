@@ -1,0 +1,27 @@
+# The train/test net protocol buffer definition
+net: "./Model/train_FCN.prototxt"
+# test_iter specifies how many forward passes the test should carry out.
+# In the case of MNIST, we have test batch size 100 and 100 test iterations,
+# covering the full 10,000 testing images.
+test_iter: 0
+
+test_interval: 999999999
+display: 10
+average_loss: 20
+#lr_policy: "fixed"
+lr_policy: "inv"
+#lr_policy: "fixed"
+gamma: 0.0001
+power: 0.75
+# lr for unnormalized softmax
+base_lr: 1e-4
+# high momentum
+momentum: 0.99
+# no gradient accumulation
+iter_size: 1
+max_iter: 300000
+weight_decay: 0.0005
+
+
+solver_mode: GPU
+#type: "Adam"
